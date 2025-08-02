@@ -1,27 +1,54 @@
 # App Store Reviews CLI
 
-Command-line tool to fetch App Store reviews for any iOS application.
+[![npm version](https://badge.fury.io/js/@alvaromurillo%2Fappstore-reviews.svg)](https://badge.fury.io/js/@alvaromurillo%2Fappstore-reviews)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Command-line tool and MCP server to fetch App Store reviews for any iOS application. Works both as a standalone CLI tool and as a Model Context Protocol server for AI assistants.
 
 ## Installation
 
+### Global Installation (CLI)
 ```bash
+npm install -g @alvaromurillo/appstore-reviews
+```
+
+### Local Installation (Library)
+```bash
+npm install @alvaromurillo/appstore-reviews
+```
+
+### Development
+```bash
+git clone https://github.com/your-username/app-store-reviews
+cd app-store-reviews
 npm install
+npm run build
 ```
 
 ## Usage
 
+### CLI Usage (Global Installation)
 ```bash
-# Install dependencies
-npm install
+# Basic usage
+app-store-reviews <APP_ID>                           # Reviews to console (US store)
+app-store-reviews <APP_ID> -c es                     # Reviews from Spain
+app-store-reviews <APP_ID> -c mx -o reviews.json     # Save to JSON file
+app-store-reviews <APP_ID> -l 50                     # Limit to 50 reviews
+```
 
-# Make CLI executable
-chmod +x index.js
+### CLI Usage (npx)
+```bash
+# Run without installing globally
+npx @alvaromurillo/appstore-reviews <APP_ID>
+npx @alvaromurillo/appstore-reviews <APP_ID> -c es -l 25
+```
 
-# Usage examples
-node index.js <APP_ID>                           # Reviews to console (US store)
-node index.js <APP_ID> -c es                     # Reviews from Spain
-node index.js <APP_ID> -c mx -o reviews.json     # Save to JSON file
-node index.js <APP_ID> -l 50                     # Limit to 50 reviews
+### CLI Usage (Development)
+```bash
+# After cloning and building
+npm start <APP_ID>                                   # Reviews to console
+npm start <APP_ID> -- -c es                          # Reviews from Spain
+node dist/index.js <APP_ID> -c mx -o reviews.json    # Direct usage
 ```
 
 ## Parameters
@@ -36,19 +63,22 @@ node index.js <APP_ID> -l 50                     # Limit to 50 reviews
 
 ```bash
 # WhatsApp reviews from Spain
-node index.js 310633997 -c es
+app-store-reviews 310633997 -c es
 
 # Instagram reviews saved to file
-node index.js 389801252 -o instagram_reviews.json
+app-store-reviews 389801252 -o instagram_reviews.json
 
 # 25 most recent TikTok reviews from Mexico
-node index.js 835599320 -c mx -l 25
+app-store-reviews 835599320 -c mx -l 25
 
 # Most helpful Instagram reviews
-node index.js 389801252 -s mosthelpful
+app-store-reviews 389801252 -s mosthelpful
 
 # Most helpful WhatsApp reviews from Spain, save to file
-node index.js 310633997 -c es -s mosthelpful -o helpful_reviews.json
+app-store-reviews 310633997 -c es -s mosthelpful -o helpful_reviews.json
+
+# Using npx (no global installation needed)
+npx @alvaromurillo/appstore-reviews 544007664 -c us -l 100
 ```
 
 ## JSON Output Structure
@@ -98,11 +128,10 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
 
 ### MCP Setup
 
-1. **Start the MCP server:**
+#### Option 1: Using Published Package (Recommended)
+1. **Install globally:**
    ```bash
-   npm run mcp
-   # or directly
-   node mcp-server.js
+   npm install -g @alvaromurillo/appstore-reviews
    ```
 
 2. **Add to Claude Desktop config:**
@@ -111,8 +140,27 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
    {
      "mcpServers": {
        "app-store-reviews": {
+         "command": "app-store-reviews-mcp"
+       }
+     }
+   }
+   ```
+
+#### Option 2: Development Setup
+1. **Start the MCP server:**
+   ```bash
+   npm run mcp
+   # or directly
+   node dist/mcp-server.js
+   ```
+
+2. **Add to Claude Desktop config:**
+   ```json
+   {
+     "mcpServers": {
+       "app-store-reviews": {
          "command": "node",
-         "args": ["/path/to/app-store-reviews/mcp-server.js"]
+         "args": ["/absolute/path/to/app-store-reviews/dist/mcp-server.js"]
        }
      }
    }
@@ -132,3 +180,23 @@ Once configured, you can ask Claude:
 - "Summarize the latest TikTok reviews and identify common complaints"
 
 The MCP server provides structured access to App Store review data for AI-powered analysis and insights.
+
+## Package Information
+
+- **Package**: [@alvaromurillo/appstore-reviews](https://www.npmjs.com/package/@alvaromurillo/appstore-reviews)
+- **Version**: 1.0.0
+- **License**: MIT
+- **TypeScript**: Full TypeScript support with declaration files
+- **Node.js**: Requires Node.js 16+ (ES modules)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and add tests
+4. Build the project: `npm run build`
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
