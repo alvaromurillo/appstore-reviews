@@ -1,0 +1,20 @@
+{
+  "name": "app-store-reviews",
+  "version": "1.0.0",
+  "description": "CLI tool to fetch App Store reviews",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "app-store-reviews": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["app-store", "reviews", "cli", "ios"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "node-fetch": "^3.3.2"
+  }
+}
