@@ -1,12 +1,55 @@
 import fetch from 'node-fetch';
 
-export async function fetchAppStoreReviews(appId, country = 'us', limit = 100, sortBy = 'mostrecent') {
+export interface Review {
+  id: string;
+  title: string;
+  content: string;
+  rating: number;
+  author: string;
+  version: string;
+  date: string;
+  country: string;
+}
+
+export interface AppStoreReviewsResponse {
+  appId: string;
+  country: string;
+  sortBy: string;
+  totalReviews: number;
+  pagesChecked: number;
+  reviews: Review[];
+}
+
+interface AppStoreEntry {
+  id?: { label: string };
+  title?: { label: string };
+  content?: { label: string };
+  'im:rating'?: { label: string };
+  author?: { name?: { label: string } };
+  'im:version'?: { label: string };
+  updated?: { label: string };
+}
+
+interface AppStoreFeed {
+  feed?: {
+    entry?: AppStoreEntry[];
+  };
+}
+
+export type SortOption = 'mostrecent' | 'mosthelpful';
+
+export async function fetchAppStoreReviews(
+  appId: string, 
+  country: string = 'us', 
+  limit: number = 100, 
+  sortBy: SortOption = 'mostrecent'
+): Promise<AppStoreReviewsResponse> {
   if (!appId) {
     throw new Error('App ID is required');
   }
 
   // Validate sortBy parameter
-  const validSorts = ['mostrecent', 'mosthelpful'];
+  const validSorts: SortOption[] = ['mostrecent', 'mosthelpful'];
   if (!validSorts.includes(sortBy)) {
     throw new Error(`Invalid sort option '${sortBy}'. Valid options are: ${validSorts.join(', ')}`);
   }
@@ -14,7 +57,7 @@ export async function fetchAppStoreReviews(appId, country = 'us', limit = 100, s
   const countryCode = country.toLowerCase();
   const reviewsPerPage = 50; // iTunes RSS typically returns ~50 reviews per page
   const maxPages = Math.ceil(limit / reviewsPerPage);
-  let allReviews = [];
+  let allReviews: Review[] = [];
   let currentPage = 1;
 
   try {
@@ -33,7 +76,7 @@ export async function fetchAppStoreReviews(appId, country = 'us', limit = 100, s
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as AppStoreFeed;
       
       if (!data.feed || !data.feed.entry) {
         if (currentPage === 1) {
@@ -45,13 +88,13 @@ export async function fetchAppStoreReviews(appId, country = 'us', limit = 100, s
       }
 
       const entries = data.feed.entry;
-      const pageReviews = entries
+      const pageReviews: Review[] = entries
         .filter(entry => entry['im:rating']) // Filter out non-review entries
         .map(entry => ({
           id: entry.id?.label || '',
           title: entry.title?.label || '',
           content: entry.content?.label || '',
-          rating: parseInt(entry['im:rating']?.label) || 0,
+          rating: parseInt(entry['im:rating']?.label || '0') || 0,
           author: entry.author?.name?.label || '',
           version: entry['im:version']?.label || '',
           date: entry.updated?.label || '',
@@ -86,7 +129,8 @@ export async function fetchAppStoreReviews(appId, country = 'us', limit = 100, s
     };
 
   } catch (error) {
-    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+    const nodeError = error as NodeJS.ErrnoException;
+    if (nodeError.code === 'ENOTFOUND' || nodeError.code === 'ECONNREFUSED') {
       throw new Error('Network error: Unable to connect to App Store');
     }
     throw error;

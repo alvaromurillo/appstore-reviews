@@ -4,6 +4,13 @@ import { Command } from 'commander';
 import { fetchAppStoreReviews } from './lib/appstore.js';
 import fs from 'fs/promises';
 
+interface ProgramOptions {
+  country: string;
+  output?: string;
+  limit: string;
+  sort: string;
+}
+
 const program = new Command();
 
 program
@@ -17,7 +24,7 @@ program
   .option('-o, --output <file>', 'Output to JSON file instead of console')
   .option('-l, --limit <number>', 'Number of reviews to fetch', '100')
   .option('-s, --sort <sort>', 'Sort order: mostrecent, mosthelpful', 'mostrecent')
-  .action(async (appId, options) => {
+  .action(async (appId: string, options: ProgramOptions) => {
     try {
       // Validate sort option
       const validSorts = ['mostrecent', 'mosthelpful'];
@@ -28,7 +35,7 @@ program
 
       console.log(`Fetching reviews for app ${appId} in country ${options.country} sorted by ${options.sort}...`);
       
-      const reviews = await fetchAppStoreReviews(appId, options.country, parseInt(options.limit), options.sort);
+      const reviews = await fetchAppStoreReviews(appId, options.country, parseInt(options.limit), options.sort as 'mostrecent' | 'mosthelpful');
       
       console.log(`Found ${reviews.totalReviews} reviews across ${reviews.pagesChecked} pages`);
       
@@ -39,7 +46,7 @@ program
         console.log(JSON.stringify(reviews, null, 2));
       }
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error('Error:', (error as Error).message);
       process.exit(1);
     }
   });

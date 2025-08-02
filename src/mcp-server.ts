@@ -5,6 +5,28 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { fetchAppStoreReviews } from './lib/appstore.js';
 
+interface FetchAppStoreReviewsArgs {
+  appId: string;
+  country?: string;
+  limit?: number;
+  sort?: 'mostrecent' | 'mosthelpful';
+}
+
+interface AnalyzeReviewsArgs {
+  appId: string;
+  country?: string;
+}
+
+interface ReviewSummaryArgs {
+  appId: string;
+  country?: string;
+}
+
+interface CompareReviewsArgs {
+  appId: string;
+  countries?: string;
+}
+
 const server = new McpServer({
   name: "app-store-reviews",
   version: "1.0.0"
@@ -29,9 +51,9 @@ server.registerTool(
       sort: z.enum(["mostrecent", "mosthelpful"]).default("mostrecent").describe("Sort order for reviews")
     }
   },
-  async ({ appId, country = 'us', limit = 100, sort = 'mostrecent' }) => {
+  async ({ appId, country = 'us', limit = 100, sort = 'mostrecent' }: FetchAppStoreReviewsArgs) => {
     try {
-      const reviews = await fetchAppStoreReviews(appId, country, limit, sort);
+      const reviews = await fetchAppStoreReviews(appId, country, limit, sort as 'mostrecent' | 'mosthelpful');
       
       return {
         content: [
@@ -46,7 +68,7 @@ server.registerTool(
         content: [
           {
             type: "text", 
-            text: `Error fetching reviews: ${error.message}`
+            text: `Error fetching reviews: ${(error as Error).message}`
           }
         ],
         isError: true
@@ -58,18 +80,26 @@ server.registerTool(
 // Register resource for accessing app reviews
 server.registerResource(
   "app-reviews",
-  "app-reviews://{appId}/{country}",
+  "app-reviews://",
   {
     title: "App Store Reviews",
-    description: "Access App Store reviews for apps. Format: app-reviews://{appId}/{country}?limit={limit}&sort={sort}"
+    description: "Access App Store reviews for apps"
   },
-  async (uri, { appId, country }) => {
+  async (uri) => {
+    // Parse URI to extract appId and country
+    const pathParts = uri.pathname.split('/').filter(p => p);
+    if (pathParts.length < 2) {
+      throw new Error('URI format should be app-reviews://{appId}/{country}');
+    }
+    
+    const appId = pathParts[0];
+    const country = pathParts[1];
     const url = new URL(uri.href);
     const limit = parseInt(url.searchParams.get('limit') || '100');
     const sort = url.searchParams.get('sort') || 'mostrecent';
     
     try {
-      const reviews = await fetchAppStoreReviews(appId, country, limit, sort);
+      const reviews = await fetchAppStoreReviews(appId, country, limit, sort as 'mostrecent' | 'mosthelpful');
       
       return {
         contents: [
@@ -81,7 +111,7 @@ server.registerResource(
         ]
       };
     } catch (error) {
-      throw new Error(`Failed to fetch reviews: ${error.message}`);
+      throw new Error(`Failed to fetch reviews: ${(error as Error).message}`);
     }
   }
 );
@@ -94,10 +124,10 @@ server.registerPrompt(
     description: "Analyze App Store reviews for sentiment, common themes, and insights",
     argsSchema: {
       appId: z.string().describe("App Store app ID"),
-      country: z.string().default("us").describe("Country code")
+      country: z.string().optional().describe("Country code")
     }
   },
-  ({ appId, country = 'us' }) => ({
+  ({ appId, country = 'us' }: AnalyzeReviewsArgs) => ({
     messages: [
       {
         role: "user",
@@ -125,10 +155,10 @@ server.registerPrompt(
     description: "Create a comprehensive summary of App Store reviews",
     argsSchema: {
       appId: z.string().describe("App Store app ID"),
-      country: z.string().default("us").describe("Country code")
+      country: z.string().optional().describe("Country code")
     }
   },
-  ({ appId, country = 'us' }) => ({
+  ({ appId, country = 'us' }: ReviewSummaryArgs) => ({
     messages: [
       {
         role: "user", 
@@ -153,19 +183,19 @@ server.registerPrompt(
   "compare-reviews",
   {
     title: "Compare App Store Reviews",
-    description: "Compare App Store reviews across different parameters",
+    description: "Compare App Store reviews across different countries",
     argsSchema: {
       appId: z.string().describe("App Store app ID"),
-      countries: z.array(z.string()).default(["us"]).describe("Country codes to compare")
+      countries: z.string().optional().describe("Country codes to compare (comma-separated, e.g., 'us,es,mx')")
     }
   },
-  ({ appId, countries = ["us"] }) => ({
+  ({ appId, countries = "us" }: CompareReviewsArgs) => ({
     messages: [
       {
         role: "user",
         content: {
           type: "text", 
-          text: `Please compare App Store reviews for app ${appId} across countries ${countries.join(', ')} and analyze:
+          text: `Please compare App Store reviews for app ${appId} across countries ${countries} and analyze:
 
 1. **Geographic Differences**: Compare reviews from different countries
 2. **Temporal Trends**: How reviews have changed over time
@@ -181,7 +211,7 @@ Use the fetchAppStoreReviews tool with different country parameters to gather co
 );
 
 // Start the server
-async function main() {
+async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
