@@ -1,12 +1,11 @@
 {
   "name": "@alvaromurillo/appstore-reviews",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "CLI tool to fetch App Store reviews",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "app-store-reviews": "./dist/index.js",
-    "app-store-reviews-mcp": "./dist/mcp-server.js"
+    "appstore-reviews": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -14,7 +13,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
-    "mcp": "npm run build && node dist/mcp-server.js",
+    "mcp": "npm run build && node dist/index.js mcp",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

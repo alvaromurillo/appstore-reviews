@@ -16,8 +16,9 @@ const program = new Command();
 program
   .name('app-store-reviews')
   .description('Fetch App Store reviews for an app')
-  .version('1.0.0');
+  .version('1.0.6');
 
+// Main command for fetching reviews
 program
   .argument('<appId>', 'App Store app ID')
   .option('-c, --country <country>', 'Country code (e.g., us, es, mx)', 'us')
@@ -47,6 +48,20 @@ program
       }
     } catch (error) {
       console.error('Error:', (error as Error).message);
+      process.exit(1);
+    }
+  });
+
+// MCP server subcommand
+program
+  .command('mcp')
+  .description('Start MCP server for AI assistants')
+  .action(async () => {
+    try {
+      const { startMcpServer } = await import('./mcp-server.js');
+      await startMcpServer();
+    } catch (error) {
+      console.error('Error starting MCP server:', (error as Error).message);
       process.exit(1);
     }
   });

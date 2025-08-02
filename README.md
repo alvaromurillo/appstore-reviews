@@ -39,8 +39,8 @@ app-store-reviews <APP_ID> -l 50                     # Limit to 50 reviews
 ### CLI Usage (npx)
 ```bash
 # Run without installing globally
-npx @alvaromurillo/appstore-reviews <APP_ID>
-npx @alvaromurillo/appstore-reviews <APP_ID> -c es -l 25
+npx appstore-reviews <APP_ID>
+npx appstore-reviews <APP_ID> -c es -l 25
 ```
 
 ### CLI Usage (Development)
@@ -78,7 +78,7 @@ app-store-reviews 389801252 -s mosthelpful
 app-store-reviews 310633997 -c es -s mosthelpful -o helpful_reviews.json
 
 # Using npx (no global installation needed)
-npx @alvaromurillo/appstore-reviews 544007664 -c us -l 100
+npx appstore-reviews 544007664 -c us -l 100
 ```
 
 ## JSON Output Structure
@@ -140,7 +140,8 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
    {
      "mcpServers": {
        "app-store-reviews": {
-         "command": "app-store-reviews-mcp"
+         "command": "appstore-reviews",
+         "args": ["mcp"]
        }
      }
    }
@@ -151,7 +152,7 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
    ```bash
    npm run mcp
    # or directly
-   node dist/mcp-server.js
+   node dist/index.js mcp
    ```
 
 2. **Add to Claude Desktop config:**
@@ -160,7 +161,7 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
      "mcpServers": {
        "app-store-reviews": {
          "command": "node",
-         "args": ["/absolute/path/to/app-store-reviews/dist/mcp-server.js"]
+         "args": ["/absolute/path/to/app-store-reviews/dist/index.js", "mcp"]
        }
      }
    }
@@ -184,7 +185,7 @@ The MCP server provides structured access to App Store review data for AI-powere
 ## Package Information
 
 - **Package**: [@alvaromurillo/appstore-reviews](https://www.npmjs.com/package/@alvaromurillo/appstore-reviews)
-- **Version**: 1.0.0
+- **Version**: 1.0.6
 - **License**: MIT
 - **TypeScript**: Full TypeScript support with declaration files
 - **Node.js**: Requires Node.js 16+ (ES modules)

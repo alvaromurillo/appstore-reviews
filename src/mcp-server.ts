@@ -211,9 +211,13 @@ Use the fetchAppStoreReviews tool with different country parameters to gather co
 );
 
 // Start the server
-async function main(): Promise<void> {
+export async function startMcpServer(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+}
+
+async function main(): Promise<void> {
+  await startMcpServer();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
