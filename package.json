@@ -5,16 +5,27 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "app-store-reviews": "./index.js"
+    "app-store-reviews": "./index.js",
+    "app-store-reviews-mcp": "./mcp-server.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "mcp": "node mcp-server.js"
   },
-  "keywords": ["app-store", "reviews", "cli", "ios"],
+  "keywords": [
+    "app-store",
+    "reviews",
+    "cli",
+    "ios",
+    "mcp",
+    "model-context-protocol"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.1",
     "commander": "^11.1.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "zod": "^3.25.76"
   }
 }

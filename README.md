@@ -91,3 +91,44 @@ node index.js 310633997 -c es -s mosthelpful -o helpful_reviews.json
 - YouTube: `544007664`
 
 Find any App Store app ID by looking at the URL on the App Store website.
+
+## MCP Server
+
+This tool can also be used as an MCP (Model Context Protocol) server, allowing AI assistants like Claude to fetch and analyze App Store reviews directly.
+
+### MCP Setup
+
+1. **Start the MCP server:**
+   ```bash
+   npm run mcp
+   # or directly
+   node mcp-server.js
+   ```
+
+2. **Add to Claude Desktop config:**
+   Add this to your Claude Desktop `claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "app-store-reviews": {
+         "command": "node",
+         "args": ["/path/to/app-store-reviews/mcp-server.js"]
+       }
+     }
+   }
+   ```
+
+### MCP Features
+
+- **Tool**: `fetchAppStoreReviews` - Fetch reviews with parameters (appId, country, limit, sort)
+- **Resource**: `app-reviews://{appId}/{country}` - Access reviews as structured data
+- **Prompts**: Pre-built prompts for review analysis, summaries, and comparisons
+
+### MCP Usage Examples
+
+Once configured, you can ask Claude:
+- "Analyze the reviews for WhatsApp (310633997) from Spain"
+- "Compare Instagram reviews between US and Mexico"
+- "Summarize the latest TikTok reviews and identify common complaints"
+
+The MCP server provides structured access to App Store review data for AI-powered analysis and insights.
