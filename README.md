@@ -126,16 +126,30 @@ Find any App Store app ID by looking at the URL on the App Store website.
 
 This tool can also be used as an MCP (Model Context Protocol) server, allowing AI assistants like Claude to fetch and analyze App Store reviews directly.
 
-### MCP Setup
+### MCP Setup for Claude Desktop
 
-#### Option 1: Using Published Package (Recommended)
+#### Method 1: NPX (Recommended - No Installation Required)
+1. **Open Claude Desktop Settings**
+2. **Navigate to:** Settings → Developer → Edit Config
+3. **Add the following configuration:**
+   ```json
+   {
+     "mcpServers": {
+       "app-store-reviews": {
+         "command": "npx",
+         "args": ["-y", "@alvaromurillo/appstore-reviews", "mcp"]
+       }
+     }
+   }
+   ```
+
+#### Method 2: Global Installation
 1. **Install globally:**
    ```bash
    npm install -g @alvaromurillo/appstore-reviews
    ```
 
 2. **Add to Claude Desktop config:**
-   Add this to your Claude Desktop `claude_desktop_config.json`:
    ```json
    {
      "mcpServers": {
@@ -147,25 +161,46 @@ This tool can also be used as an MCP (Model Context Protocol) server, allowing A
    }
    ```
 
-#### Option 2: Development Setup
-1. **Start the MCP server:**
-   ```bash
-   npm run mcp
-   # or directly
-   node dist/index.js mcp
-   ```
+#### Method 3: Claude Code CLI
+If you're using Claude Code, you can add the MCP server with a single command:
+```bash
+claude mcp add-json app-store-reviews '{
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@alvaromurillo/appstore-reviews", "mcp"]
+}'
+```
 
-2. **Add to Claude Desktop config:**
-   ```json
-   {
-     "mcpServers": {
-       "app-store-reviews": {
-         "command": "node",
-         "args": ["/absolute/path/to/app-store-reviews/dist/index.js", "mcp"]
-       }
-     }
-   }
-   ```
+#### Method 4: Development Setup
+For local development or custom installations:
+```json
+{
+  "mcpServers": {
+    "app-store-reviews": {
+      "command": "node",
+      "args": ["/absolute/path/to/app-store-reviews/dist/index.js", "mcp"]
+    }
+  }
+}
+```
+
+### Other IDEs
+
+#### Cursor IDE
+Add to your Cursor MCP configuration:
+```json
+{
+  "mcpServers": {
+    "app-store-reviews": {
+      "command": "npx",
+      "args": ["-y", "@alvaromurillo/appstore-reviews", "mcp"]
+    }
+  }
+}
+```
+
+### Verification
+After configuration, restart Claude Desktop. You should see the App Store Reviews server listed in your MCP connections. You can verify it's working by asking Claude to fetch reviews for any app.
 
 ### MCP Features
 
